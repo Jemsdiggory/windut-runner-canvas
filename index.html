@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Treasure Canvas</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <main class="game-page">
+    <header class="intro">
+      <p class="eyebrow">TUGAS PEMROGRAMAN GAME WEB</p>
+      <h1>Windut Runner <span>Canvas</span></h1>
+    </header>
+
+    <section class="game-card" aria-label="Area permainan">
+    
+      <canvas id="gameCanvas" width="800" height="440" aria-label="Player bergerak di dalam canvas">
+        Browser kamu belum mendukung elemen canvas.
+      </canvas>
+      <p class="help-text">Terbang naik-turun dengan tombol panah atas/bawah atau W/S.</p>
+      <div class="game-actions">
+        <button id="restartButton" type="button" hidden>RESTART</button>
+      </div>
+    </section>
+
+    
+  </main>
+  <script src="script.js"></script>
+</body>
+</html>
