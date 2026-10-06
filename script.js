@@ -1,5 +1,7 @@
 const canvas = document.getElementById("gameCanvas");
 const ctx = canvas.getContext("2d");
+const startButton = document.getElementById("startButton");
+const pauseButton = document.getElementById("pauseButton");
 const restartButton = document.getElementById("restartButton");
 
 // settings game nya
@@ -42,7 +44,7 @@ const hazards = [
 const keys = new Set();
 let score = 0;
 let timeLeft = setting.gameTime;
-let gameState = "PLAYING";
+let gameState = "START";
 let message = "";
 let messageUntil = 0;
 let lastFrame = 0;
@@ -203,10 +205,22 @@ function drawGame() {
     ctx.textAlign = "center";
     ctx.fillStyle = gameState === "WIN" ? "#ffe06b" : "#fff";
     ctx.font = "bold 36px Arial";
-    ctx.fillText(gameState === "WIN" ? "YOU WIN!" : "GAME OVER", canvas.width / 2, canvas.height / 2);
+    const titles = {
+      START: "TREASURE CANVAS",
+      PAUSED: "PAUSED",
+      WIN: "YOU WIN!",
+      GAME_OVER: "GAME OVER"
+    };
+    ctx.fillText(titles[gameState], canvas.width / 2, canvas.height / 2);
     ctx.font = "bold 18px Arial";
     ctx.fillStyle = "#fff";
-    ctx.fillText(`Score akhir: ${score}`, canvas.width / 2, canvas.height / 2 + 34);
+    const details = {
+      START: "Tekan MULAI untuk bermain",
+      PAUSED: "Tekan LANJUTKAN untuk kembali bermain",
+      WIN: `Score akhir: ${score}`,
+      GAME_OVER: `Score akhir: ${score}`
+    };
+    ctx.fillText(details[gameState], canvas.width / 2, canvas.height / 2 + 34);
   }
 }
 
@@ -215,6 +229,8 @@ function finishGame(state) {
   gameState = state;
   keys.clear();
   clearInterval(timerId);
+  pauseButton.hidden = true;
+  startButton.hidden = true;
   restartButton.hidden = false;
 }
 
@@ -314,6 +330,33 @@ function wrapOffset(value, width) {
   return ((value % width) + width) % width;
 }
 
+function startTimer() {
+  clearInterval(timerId);
+  timerId = setInterval(() => {
+    if (gameState !== "PLAYING") return;
+    timeLeft--;
+    if (timeLeft <= 0) {
+      timeLeft = 0;
+      finishGame("GAME_OVER");
+    }
+    drawGame();
+  }, 1000);
+}
+
+function pauseGame() {
+  if (gameState === "PLAYING") {
+    gameState = "PAUSED";
+    clearInterval(timerId);
+    keys.clear();
+    pauseButton.textContent = "LANJUTKAN";
+  } else if (gameState === "PAUSED") {
+    gameState = "PLAYING";
+    pauseButton.textContent = "PAUSE";
+    startTimer();
+  }
+  drawGame();
+}
+
 function restartGame() {
   score = 0;
   timeLeft = setting.gameTime;
@@ -341,17 +384,11 @@ function restartGame() {
   hazards[2].y = 200;
   message = "";
   keys.clear();
+  startButton.hidden = true;
+  pauseButton.hidden = false;
+  pauseButton.textContent = "PAUSE";
   restartButton.hidden = true;
-  clearInterval(timerId);
-  timerId = setInterval(() => {
-    if (gameState !== "PLAYING") return;
-    timeLeft--;
-    if (timeLeft <= 0) {
-      timeLeft = 0;
-      finishGame("GAME_OVER");
-    }
-    drawGame();
-  }, 1000);
+  startTimer();
   drawGame();
 }
 
@@ -369,6 +406,8 @@ document.addEventListener("keyup", (event) => {
 
 window.addEventListener("blur", () => keys.clear());
 
+startButton.addEventListener("click", restartGame);
+pauseButton.addEventListener("click", pauseGame);
 restartButton.addEventListener("click", restartGame);
-restartGame();
+drawGame();
 requestAnimationFrame(gameLoop);
