@@ -3,6 +3,36 @@ const ctx = canvas.getContext("2d");
 const startButton = document.getElementById("startButton");
 const pauseButton = document.getElementById("pauseButton");
 const restartButton = document.getElementById("restartButton");
+const scoreValue = document.getElementById("scoreValue");
+const timeValue = document.getElementById("timeValue");
+const soundButton = document.getElementById("soundButton");
+const soundLabel = document.getElementById("soundLabel");
+const music = new Audio("bgm.mp3");
+music.loop = true;
+music.volume = 0.28;
+const coinSound = new Audio("coin-pickup.mp3");
+coinSound.volume = 0.65;
+let soundEnabled = true;
+
+function playSound(audio) {
+  if (!soundEnabled) return;
+  audio.currentTime = 0;
+  audio.play().catch(() => {});
+}
+
+function syncHud() {
+  scoreValue.textContent = score;
+  timeValue.textContent = timeLeft;
+  timeValue.parentElement.classList.toggle("time-low", timeLeft <= 10);
+}
+
+function syncMusic() {
+  if (!soundEnabled || gameState !== "PLAYING") {
+    music.pause();
+  } else {
+    music.play().catch(() => {});
+  }
+}
 
 // settings game nya
 const setting = {
@@ -227,6 +257,8 @@ function drawGame() {
 function finishGame(state) {
   if (gameState !== "PLAYING") return;
   gameState = state;
+  music.pause();
+  if (state === "WIN") playSound(coinSound);
   keys.clear();
   clearInterval(timerId);
   pauseButton.hidden = true;
@@ -295,6 +327,8 @@ function update(deltaTime) {
   for (const coin of coins) {
     if (isColliding(playerBox, getBox(coin))) {
       score += setting.coinScore;
+      syncHud();
+      playSound(coinSound);
       moveCoin(coin);
       message = `+${setting.coinScore} Score!`;
       messageUntil = performance.now() + 800;
@@ -310,6 +344,7 @@ function update(deltaTime) {
   for (const hazard of hazards) {
     if (isColliding(playerBox, getBox(hazard))) {
       score -= setting.obstaclePenalty;
+      syncHud();
       moveHazard(hazard);
       message = `Bahaya! -${setting.obstaclePenalty} Score`;
       messageUntil = performance.now() + 1200;
@@ -335,6 +370,7 @@ function startTimer() {
   timerId = setInterval(() => {
     if (gameState !== "PLAYING") return;
     timeLeft--;
+    syncHud();
     if (timeLeft <= 0) {
       timeLeft = 0;
       finishGame("GAME_OVER");
@@ -354,6 +390,7 @@ function pauseGame() {
     pauseButton.textContent = "PAUSE";
     startTimer();
   }
+  syncMusic();
   drawGame();
 }
 
@@ -361,6 +398,8 @@ function restartGame() {
   score = 0;
   timeLeft = setting.gameTime;
   gameState = "PLAYING";
+  syncHud();
+  syncMusic();
   player.x = startPosition.x;
   player.flightY = startPosition.y;
   player.y = player.flightY;
@@ -409,5 +448,37 @@ window.addEventListener("blur", () => keys.clear());
 startButton.addEventListener("click", restartGame);
 pauseButton.addEventListener("click", pauseGame);
 restartButton.addEventListener("click", restartGame);
+soundButton.addEventListener("click", () => {
+  soundEnabled = !soundEnabled;
+  soundButton.setAttribute("aria-pressed", String(soundEnabled));
+  soundButton.setAttribute("aria-label", soundEnabled ? "Matikan suara" : "Nyalakan suara");
+  soundButton.querySelector("span").textContent = soundEnabled ? "🔊" : "🔇";
+  soundLabel.textContent = soundEnabled ? "Suara aktif" : "Suara mati";
+  syncMusic();
+});
+
+function bindTouchControl(buttonId, key) {
+  const button = document.getElementById(buttonId);
+  button.addEventListener("pointerdown", (event) => {
+    event.preventDefault();
+    if (gameState === "PLAYING") keys.add(key);
+    button.setPointerCapture(event.pointerId);
+  });
+  ["pointerup", "pointercancel", "lostpointercapture"].forEach((eventName) =>
+    button.addEventListener(eventName, () => keys.delete(key))
+  );
+}
+bindTouchControl("upButton", "arrowup");
+bindTouchControl("downButton", "arrowdown");
+
+document.addEventListener("keydown", (event) => {
+  if (event.repeat || event.key.toLowerCase() !== "p") return;
+  if (gameState === "PLAYING" || gameState === "PAUSED") pauseGame();
+});
+document.addEventListener("visibilitychange", () => {
+  if (document.hidden && gameState === "PLAYING") pauseGame();
+});
+
+syncHud();
 drawGame();
 requestAnimationFrame(gameLoop);

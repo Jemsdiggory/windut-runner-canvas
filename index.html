@@ -3,7 +3,8 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Treasure Canvas</title>
+  <meta name="theme-color" content="#f5f7fc" />
+  <title>Windut Runner — Treasure Canvas</title>
   <link rel="stylesheet" href="style.css" />
 </head>
 <body>
@@ -11,22 +12,37 @@
     <header class="intro">
       <p class="eyebrow">TUGAS PEMROGRAMAN GAME WEB</p>
       <h1>Windut Runner <span>Canvas</span></h1>
+      <p class="tagline">Terbang, kumpulkan koin, dan hindari bahaya!</p>
     </header>
 
     <section class="game-card" aria-label="Area permainan">
-    
-      <canvas id="gameCanvas" width="800" height="440" aria-label="Player bergerak di dalam canvas">
-        Browser kamu belum mendukung elemen canvas.
-      </canvas>
-      <p class="help-text">Terbang naik-turun dengan tombol panah atas/bawah atau W/S.</p>
-      <div class="game-actions">
-        <button id="startButton" type="button">MULAI</button>
-        <button id="pauseButton" type="button" hidden>PAUSE</button>
-        <button id="restartButton" type="button" hidden>RESTART</button>
+      <div class="card-heading">
+        <div><p class="eyebrow">WINDUT RUN </p><h2>Siap untuk kabur?</h2></div>
+        <button id="soundButton" class="sound-button" type="button" aria-pressed="true" aria-label="Matikan suara"><span aria-hidden="true">🔊</span><span id="soundLabel">Suara aktif</span></button>
+      </div>
+      <div class="stats" aria-label="Status permainan">
+        <div class="stat"><span class="stat-label">Skor</span><strong id="scoreValue" aria-live="polite">0</strong></div>
+        <div class="stat"><span class="stat-label">Target</span><strong>100</strong></div>
+        <div class="stat"><span class="stat-label">Waktu</span><strong><span id="timeValue" aria-live="polite">60</span><span aria-hidden="true">s</span></strong></div>
+      </div>
+      <div class="canvas-wrap">
+        <canvas id="gameCanvas" width="800" height="440" aria-label="Pemain bergerak di dalam arena permainan">
+          Browser kamu belum mendukung elemen canvas.
+        </canvas>
+      </div>
+      <div class="game-footer">
+        <p class="help-text">Kontrol: <b>↑ / ↓</b> atau <b>W / S</b> untuk bergerak. Di ponsel, gunakan tombol arah.</p>
+        <div class="game-actions">
+          <button id="startButton" class="primary" type="button">MULAI</button>
+          <button id="pauseButton" type="button" hidden>PAUSE</button>
+          <button id="restartButton" class="primary" type="button" hidden>MAIN LAGI</button>
+        </div>
+      </div>
+      <div class="touch-controls" aria-label="Kontrol sentuh">
+        <button id="upButton" type="button" aria-label="Terbang ke atas">↑ Atas</button>
+        <button id="downButton" type="button" aria-label="Terbang ke bawah">↓ Bawah</button>
       </div>
     </section>
-
-    
   </main>
   <script src="script.js"></script>
 </body>
